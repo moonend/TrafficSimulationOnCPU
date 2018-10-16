@@ -1,6 +1,5 @@
 #include "logger.h"
-
-//#define ENABLE_DEBUG
+#define ENABLE_DEBUG
 
 Logger * Logger_create( void )
 {

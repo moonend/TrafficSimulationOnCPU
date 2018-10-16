@@ -72,6 +72,10 @@ typedef struct {
 
 	int numVeh; 	 	  			/// Number of vehicles
 	int vehIDArr[MAX_SOURCE_VEC];	/// ID of vehicles
+	int currLinkOrderArr[MAX_SOURCE_VEC];
+	int nextLinkIDArr[MAX_SOURCE_VEC];
+	int minTargetLaneArr[MAX_SOURCE_VEC];
+	int maxTargetLaneArr[MAX_SOURCE_VEC];
 
 } source_cell;
 
@@ -120,6 +124,7 @@ void Evaluate_OLC(roadlink *l);
 	void Select_Veh(roadlink*, int, int, int, int);
 void LCSim(roadlink*);
 	void MoveLC(int*, int, int*, int, int);
+    void Remove_Blank(int*, int);
 
 /// CF functions
 void Evaluate_CF(roadlink*);
@@ -141,13 +146,14 @@ void Reset_Sink(sink_cell*);
 
 /// Source functions
 void Update_Source(vehicle*, int, source_cell*, int);
-void Start_Path(roadlink*, source_cell*, int);
-void End_Path(roadlink* l, sink_cell*, int);
+void Start_Path(roadlink*, source_cell*);
+void End_Path(roadlink* l, sink_cell*);
 	void Remove_Value(int*, int, int);
 
 void SimulationStep(vehicle*, int, roadlink l[], source_cell sc[], sink_cell sk[], connection_cell cc[], int, int);
 
 double get_time_ms();
-void PrintOutput(roadlink l[], int);
+void PrintOutput(roadlink l[], source_cell sc[], sink_cell sk[], int);
+void PrintCC(connection_cell cc[], int);
 
 #endif /* TRAFFICSIM_H_ */
