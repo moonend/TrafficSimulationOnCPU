@@ -21,6 +21,7 @@ source_cell *mysource;
 sink_cell *mysink;
 connection_cell *mycon;
 
+FILE *outputfile;
 char *edgelink_loc =
 		"/home/moonend/Downloads/toy-data-defined-by-ETRI/toy4.edge.xml";
 int **edges_temp, **veh_temp, **nodes_temp, **cc_temp;
@@ -1545,7 +1546,7 @@ void SimulationStep(vehicle* v, int numVeh, roadlink l[], source_cell sc[],
 		sink_cell sk[], connection_cell cc[], int numLink, int numLoop) {
 	for (int count = 0; count < numLoop; count++) {
 		log_debug(lggr, "SimulationTime: %d", count);
-
+		fprintf(outputfile, "<data timestep=\"%d\">\n", count);
 		//int updateCycle = UPDATE_INTERVAL;
 		int updateStep = count % UPDATE_INTERVAL;
 
@@ -1687,6 +1688,7 @@ void SimulationStep(vehicle* v, int numVeh, roadlink l[], source_cell sc[],
 		//PrintOutput(mylink, mysource, mysink, numLink);
 		log_debug(lggr, "RESETLINK");
 		PrintOutput(mylink, mysource, mysink, numLink);
+		fprintf(outputfile, "</data>\n", count);
 	}
 }
 
@@ -1716,18 +1718,23 @@ void PrintCC(connection_cell cc[], int numLink) {
 }
 
 void PrintOutput(roadlink l[], source_cell sc[], sink_cell sk[], int numLink) {
-	log_debug(lggr, "PrintOutput");
+//	log_debug(lggr, "PrintOutput");
+	fprintf(outputfile, "\t<edges>\n");
 	for (int link = 0; link < numLink; link++) {
-			printf("link %2d:\t", link);
+			//fprintf(outputfile, "link %2d:\t", link);
+		fprintf(outputfile, "\t\t<edge id=\"%d\">\n", link);
 
 			for (int sect = 0; sect < NUM_SECTION + 2; sect++) {
 				for (int lane = 0; lane < NUM_LANE; lane++) {
-					printf("%2d ", l[link].numVehArr[sect][lane]);
+					fprintf(outputfile, "\t\t\t<lane id=\"%d\" vehicle_count=\"%d\"/>\n", sect*10+lane, l[link].numVehArr[sect][lane]);
 				}
-				printf(" | ");
+//				printf(" | ");
 			}
-			printf("\n");
+			fprintf(outputfile, "\t\t</edge>\n");
+
+//			printf("\n");
 		}
+	fprintf(outputfile, "\t</edges>\n");
 
 //	for (int link = 0 ; link < numLink ; link++) {
 //		for (int sect = 0 ; sect < NUM_SECTION+2 ; sect++) {
@@ -1778,6 +1785,9 @@ log_info(lggr, "# of vehicles: %s", argv[1]);
 log_info(lggr, "# of links: %s", argv[2]);
 log_info(lggr, "# of simulation steps: %s", argv[3]);
 
+outputfile = fopen("output", "w");
+fprintf(outputfile, "<full-export>\n");
+
 myveh = (vehicle*) calloc(numVeh, sizeof(vehicle));
 mylink = (roadlink*) calloc(numLink, sizeof(roadlink));
 mysource = (source_cell*) malloc(numLink * sizeof(source_cell));
@@ -1794,8 +1804,12 @@ SimulationStep(myveh, numVeh, mylink, mysource, mysink, mycon, numLink,
 		numLoop);
 stop = get_time_ms();
 double result = stop - start;
+
 log_info(lggr, "Elapsed Time: %f", result);
 //PrintOutput(mylink, numLink);
 Logger_free(lggr);
+fprintf(outputfile, "</full-export>");
+fclose(outputfile);
+
 return 0;
 }
